@@ -25,6 +25,44 @@ on:
         default: "1"
 
 jobs:
+  test-and-dependency-submission:
+    name: Run tests and submit dependencies for Golang
+    runs-on: ubuntu-latest
+    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
+    permissions:
+      contents: write
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.1.0
+
+      - name: Run snapshot action to submit dependencies
+        uses: actions/go-dependency-submission@v2
+        with:
+          # Required: Define the repo path to the go.mod file used by the
+          # build target
+          go-mod-path: go.mod
+          #
+          # Optional: Define the path of a build target (a file with a
+          # `main()` function) If not defined, this Action will collect all
+          # dependencies used by all build targets for the module, which may
+          # include Go dependencies used by tests and tooling.
+          go-build-target: main.go
+
+      - name: Running Tests
+        run: |
+          go mod tidy
+        # make test
+
   # Build the container
   build:
     name: Build Container
@@ -154,3 +192,9 @@ jobs:
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+
+      - name: Generate SBOM for container image
+        uses: anchore/sbom-action@v0.24.0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          dependency-snapshot: true
