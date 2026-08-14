@@ -1,4 +1,4 @@
-package example
+package webhook
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-func (e *exampleSolver) handleDNSRequest(w dns.ResponseWriter, req *dns.Msg) {
+func (e *micetroSolver) handleDNSRequest(w dns.ResponseWriter, req *dns.Msg) {
 	msg := new(dns.Msg)
 	msg.SetReply(req)
 	switch req.Opcode {
@@ -26,7 +26,7 @@ func (e *exampleSolver) handleDNSRequest(w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
-func (e *exampleSolver) addDNSAnswer(q dns.Question, msg *dns.Msg, req *dns.Msg) error {
+func (e *micetroSolver) addDNSAnswer(q dns.Question, msg *dns.Msg, req *dns.Msg) error {
 	switch q.Qtype {
 	// Always return loopback for any A query
 	case dns.TypeA:

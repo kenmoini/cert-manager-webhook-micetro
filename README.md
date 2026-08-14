@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png" height="256" width="256" alt="cert-manager project logo" />
 </p>
 
-# ACME webhook example
+# Micetro DNS ACME Webhook
 
 The ACME issuer type supports an optional 'webhook' solver, which can be used
 to implement custom DNS01 challenge solving logic.
@@ -37,7 +37,7 @@ To make the set up of these webhook's easier, we provide a template repository
 that can be used to get started quickly.
 
 When implementing your webhook, you should set the `groupName` in the
-[values.yml](deploy/example-webhook/values.yaml) of your chart to a domain name that 
+[values.yml](deploy/cert-manager-webhook-micetro/values.yaml) of your chart to a domain name that 
 you - as the webhook-author - own. It should not need to be adjusted by the users of
 your chart.
 

@@ -2,6 +2,9 @@ GO ?= $(shell which go)
 OS ?= $(shell $(GO) env GOOS)
 ARCH ?= $(shell $(GO) env GOARCH)
 
+# CONTAINER_TOOL defines the container tool to be used for building images.
+CONTAINER_TOOL ?= podman
+
 IMAGE_NAME := "webhook"
 IMAGE_TAG := "latest"
 
@@ -10,7 +13,7 @@ OUT := $(shell pwd)/_out
 # FIXME: Required to set the environment variables below. Remove when fixed.
 ENVTEST_K8S_VERSION=1.35.0
 
-HELM_FILES := $(shell find deploy/example-webhook)
+HELM_FILES := $(shell find deploy/cert-manager-webhook-micetro)
 
 # FIXME: The environment variables are required by the test helper in cert-manager, but not required to run the tests.
 test: setup-envtest
@@ -26,17 +29,17 @@ clean:
 
 .PHONY: build
 build:
-	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)" .
+	$(CONTAINER_TOOL) build -t "$(IMAGE_NAME):$(IMAGE_TAG)" .
 
 .PHONY: rendered-manifest.yaml
 rendered-manifest.yaml: $(OUT)/rendered-manifest.yaml
 
 $(OUT)/rendered-manifest.yaml: $(HELM_FILES) | $(OUT)
 	helm template \
-	    --name example-webhook \
+	    --name cert-manager-webhook-micetro \
             --set image.repository=$(IMAGE_NAME) \
             --set image.tag=$(IMAGE_TAG) \
-            deploy/example-webhook > $@
+            deploy/cert-manager-webhook-micetro > $@
 
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin

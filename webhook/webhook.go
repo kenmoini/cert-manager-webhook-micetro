@@ -1,6 +1,6 @@
 // package example contains a self-contained example of a webhook that passes the cert-manager
 // DNS conformance tests
-package example
+package webhook
 
 import (
 	"fmt"
@@ -13,32 +13,32 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-type exampleSolver struct {
+type micetroSolver struct {
 	name       string
 	server     *dns.Server
 	txtRecords map[string]string
 	sync.RWMutex
 }
 
-func (e *exampleSolver) Name() string {
+func (e *micetroSolver) Name() string {
 	return e.name
 }
 
-func (e *exampleSolver) Present(ch *acme.ChallengeRequest) error {
+func (e *micetroSolver) Present(ch *acme.ChallengeRequest) error {
 	e.Lock()
 	e.txtRecords[ch.ResolvedFQDN] = ch.Key
 	e.Unlock()
 	return nil
 }
 
-func (e *exampleSolver) CleanUp(ch *acme.ChallengeRequest) error {
+func (e *micetroSolver) CleanUp(ch *acme.ChallengeRequest) error {
 	e.Lock()
 	delete(e.txtRecords, ch.ResolvedFQDN)
 	e.Unlock()
 	return nil
 }
 
-func (e *exampleSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
+func (e *micetroSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
 	go func(done <-chan struct{}) {
 		<-done
 		if err := e.server.Shutdown(); err != nil {
@@ -55,7 +55,7 @@ func (e *exampleSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan 
 }
 
 func New(port string) webhook.Solver {
-	e := &exampleSolver{
+	e := &micetroSolver{
 		name:       "example",
 		txtRecords: make(map[string]string),
 	}
