@@ -1,0 +1,44 @@
+# Always run basic Golang linting
+name: Lint
+
+on:
+  push:
+    paths-ignore:
+      - README.md
+      - LICENSE
+      - .github/dependabot.yml
+      - .github/workflows/**
+      - deploy/cert-manager-webhook-micetro/**
+      - Dockerfile
+      - Makefile
+      - OWNERS
+      - renovate.json
+  pull_request:
+    paths-ignore:
+      - README.md
+      - LICENSE
+      - .github/dependabot.yml
+      - .github/workflows/**
+      - deploy/cert-manager-webhook-micetro/**
+      - Dockerfile
+      - Makefile
+      - OWNERS
+      - renovate.json
+
+jobs:
+  lint:
+    name: Run on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.1.0
