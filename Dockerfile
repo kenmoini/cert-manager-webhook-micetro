@@ -1,6 +1,9 @@
 FROM registry.access.redhat.com/ubi10/go-toolset:1786496358 AS build_deps
 
 WORKDIR /workspace
+USER 0
+
+RUN dnf install -y git
 
 COPY go.mod .
 COPY go.sum .
@@ -13,9 +16,12 @@ COPY . .
 
 RUN CGO_ENABLED=0 go build -o cert-manager-webhook-micetro -ldflags '-w -extldflags "-static"' .
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
-
-RUN apk add --no-cache ca-certificates
+FROM registry.access.redhat.com/ubi10/ubi-minimal:1786398666
+USER 0
+RUN microdnf install -y ca-certificates && \
+    update-ca-trust && \
+    microdnf clean all && \
+    rm -rf /var/cache/dnf
 
 COPY --from=build /workspace/cert-manager-webhook-micetro /usr/local/bin/cert-manager-webhook-micetro
 
