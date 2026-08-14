@@ -14,7 +14,7 @@ FROM build_deps AS build
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o cert-manager-webhook-micetro -ldflags '-w -extldflags "-static"' .
+RUN CGO_ENABLED=0 go build -o cert-manager-webhook-micetro -buildvcs=false -ldflags '-w -extldflags "-static"' .
 
 FROM registry.access.redhat.com/ubi10/ubi-minimal:1786398666
 USER 0
