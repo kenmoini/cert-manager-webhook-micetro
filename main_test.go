@@ -5,7 +5,7 @@ import (
 
 	acmetest "github.com/cert-manager/cert-manager/test/acme"
 
-	"github.com/kenmoini/cert-manager-webhook-micetro/webhook"
+	micetrowebhook "github.com/kenmoini/cert-manager-webhook-micetro/webhook"
 )
 
 func TestRunsSuite(t *testing.T) {
@@ -15,16 +15,16 @@ func TestRunsSuite(t *testing.T) {
 	//
 
 	// Uncomment the below fixture when implementing your custom DNS provider
-	//fixture := acmetest.NewFixture(&micetroDNSProviderSolver{},
+	//fixture := acmetest.NewFixture(&micetrowebhook.MicetroDNSProviderSolver{},
 	//	acmetest.SetResolvedZone(zone),
 	//	acmetest.SetAllowAmbientCredentials(false),
-	//	acmetest.SetManifestPath("testdata/my-custom-solver"),
+	//	acmetest.SetManifestPath("testdata/micetro-solver"),
 	//	acmetest.SetBinariesPath("_test/kubebuilder/bin"),
 	//)
 	solver := example.New("59351")
 	fixture := acmetest.NewFixture(solver,
 		acmetest.SetResolvedZone("example.com."),
-		acmetest.SetManifestPath("testdata/my-custom-solver"),
+		acmetest.SetManifestPath("testdata/micetro-solver"),
 		acmetest.SetDNSServer("127.0.0.1:59351"),
 		acmetest.SetUseAuthoritative(false),
 	)
