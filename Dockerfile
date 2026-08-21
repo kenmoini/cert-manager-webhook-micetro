@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi10/go-toolset:1786496358 AS build_deps
+FROM registry.access.redhat.com/ubi10/go-toolset:1786959201 AS build_deps
 
 WORKDIR /workspace
 USER 0
