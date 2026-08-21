@@ -16,7 +16,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 go build -o cert-manager-webhook-micetro -buildvcs=false -ldflags '-w -extldflags "-static"' .
 
-FROM registry.access.redhat.com/ubi10/ubi-minimal:1786398666
+FROM registry.access.redhat.com/ubi10/ubi-minimal:1786960777
 USER 0
 RUN microdnf install -y ca-certificates && \
     update-ca-trust && \
