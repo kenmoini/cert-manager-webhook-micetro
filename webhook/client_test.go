@@ -33,7 +33,8 @@ func TestClient_Authenticate_Success(t *testing.T) {
 		assert.Equal(t, "secret", req.Password)
 
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(micetroAuthResponse{Session: "test-session-token"})
+		err = json.NewEncoder(w).Encode(micetroAuthResponse{Session: "test-session-token"})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 
@@ -45,7 +46,8 @@ func TestClient_Authenticate_Success(t *testing.T) {
 func TestClient_Authenticate_InvalidCredentials(t *testing.T) {
 	client, server := newTestClient(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(micetroAPIError{Code: 401, Message: "Invalid credentials"})
+		err := json.NewEncoder(w).Encode(micetroAPIError{Code: 401, Message: "Invalid credentials"})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 
@@ -60,13 +62,14 @@ func TestClient_FindZone_ExactMatch(t *testing.T) {
 		assert.Contains(t, r.URL.Path, "/dnsZones")
 		assert.Contains(t, r.URL.RawQuery, "filter=example.com")
 
-		json.NewEncoder(w).Encode(micetroZonesResponse{
+		err := json.NewEncoder(w).Encode(micetroZonesResponse{
 			DNSZones: []micetroZone{
 				{Ref: "DNSZones/1", Name: "example.com.", Type: "Primary"},
 				{Ref: "DNSZones/2", Name: "other-example.com.", Type: "Primary"},
 			},
 			TotalResults: 2,
 		})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -79,10 +82,11 @@ func TestClient_FindZone_ExactMatch(t *testing.T) {
 
 func TestClient_FindZone_NotFound(t *testing.T) {
 	client, server := newTestClient(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(micetroZonesResponse{
+		err := json.NewEncoder(w).Encode(micetroZonesResponse{
 			DNSZones:     []micetroZone{},
 			TotalResults: 0,
 		})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -96,10 +100,11 @@ func TestClient_FindZone_WithView(t *testing.T) {
 	client, server := newTestClient(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.RawQuery, "dnsViewRef=DNSViews/1")
 
-		json.NewEncoder(w).Encode(micetroZonesResponse{
+		err := json.NewEncoder(w).Encode(micetroZonesResponse{
 			DNSZones:     []micetroZone{{Ref: "DNSZones/5", Name: "example.com.", Type: "Primary"}},
 			TotalResults: 1,
 		})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -114,10 +119,11 @@ func TestClient_FindViewRef_Found(t *testing.T) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Contains(t, r.URL.Path, "/dnsViews")
 
-		json.NewEncoder(w).Encode(micetroViewsResponse{
+		err := json.NewEncoder(w).Encode(micetroViewsResponse{
 			DNSViews:     []micetroView{{Ref: "DNSViews/1", Name: "internal"}},
 			TotalResults: 1,
 		})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -139,9 +145,10 @@ func TestClient_CreateTXTRecord_Success(t *testing.T) {
 		assert.Equal(t, "POST", r.Method)
 		assert.Contains(t, r.URL.Path, "/dnsZones/DNSZones/1/dnsRecords")
 
-		body, _ := io.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
+		require.NoError(t, err)
 		var req micetroCreateRecordRequest
-		err := json.Unmarshal(body, &req)
+		err = json.Unmarshal(body, &req)
 		require.NoError(t, err)
 		assert.Equal(t, "_acme-challenge.sub.example.com.", req.DNSRecord.Name)
 		assert.Equal(t, "TXT", req.DNSRecord.Type)
@@ -149,7 +156,8 @@ func TestClient_CreateTXTRecord_Success(t *testing.T) {
 		assert.Equal(t, "60", req.DNSRecord.TTL)
 
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(`{"ref":"DNSRecords/42"}`))
+		_, err = w.Write([]byte(`{"ref":"DNSRecords/42"}`))
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -161,7 +169,8 @@ func TestClient_CreateTXTRecord_Success(t *testing.T) {
 func TestClient_CreateTXTRecord_Error(t *testing.T) {
 	client, server := newTestClient(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(micetroAPIError{Code: 400, Message: "Invalid record data"})
+		err := json.NewEncoder(w).Encode(micetroAPIError{Code: 400, Message: "Invalid record data"})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -175,7 +184,7 @@ func TestClient_FindTXTRecord_Found(t *testing.T) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Contains(t, r.URL.Path, "/dnsZones/DNSZones/1/dnsRecords")
 
-		json.NewEncoder(w).Encode(micetroRecordsResponse{
+		err := json.NewEncoder(w).Encode(micetroRecordsResponse{
 			DNSRecords: []micetroRecord{
 				{Ref: "DNSRecords/10", Name: "_acme-challenge.sub", Type: "TXT", Data: "wrong-token"},
 				{Ref: "DNSRecords/11", Name: "_acme-challenge.sub", Type: "TXT", Data: "correct-token"},
@@ -183,6 +192,7 @@ func TestClient_FindTXTRecord_Found(t *testing.T) {
 			},
 			TotalResults: 3,
 		})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -194,10 +204,11 @@ func TestClient_FindTXTRecord_Found(t *testing.T) {
 
 func TestClient_FindTXTRecord_NotFound(t *testing.T) {
 	client, server := newTestClient(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(micetroRecordsResponse{
+		err := json.NewEncoder(w).Encode(micetroRecordsResponse{
 			DNSRecords:   []micetroRecord{},
 			TotalResults: 0,
 		})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"
@@ -223,7 +234,8 @@ func TestClient_DeleteRecord_Success(t *testing.T) {
 func TestClient_DeleteRecord_NotFound(t *testing.T) {
 	client, server := newTestClient(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(micetroAPIError{Code: 404, Message: "Object not found"})
+		err := json.NewEncoder(w).Encode(micetroAPIError{Code: 404, Message: "Object not found"})
+		require.NoError(t, err)
 	}))
 	defer server.Close()
 	client.token = "test-token"

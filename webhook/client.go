@@ -69,7 +69,7 @@ func (c *MicetroDNSProviderSolver) NewClient(cfg *MicetroDNSProviderConfig) (*Cl
 	return client, nil
 }
 
-func (client *Client) authenticate(username, password string) error {
+func (client *Client) authenticate(username, password string) (retErr error) {
 	authReq := micetroAuthRequest{
 		LoginName: username,
 		Password:  password,
@@ -91,7 +91,11 @@ func (client *Client) authenticate(username, password string) error {
 	if err != nil {
 		return fmt.Errorf("auth request failed: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing response body: %v", closeErr)
+		}
+	}()
 
 	if err := checkResponse(resp); err != nil {
 		return fmt.Errorf("authentication failed: %v", err)
@@ -140,7 +144,10 @@ func checkResponse(resp *http.Response) error {
 		return nil
 	}
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("unexpected status %d (failed to read response body: %v)", resp.StatusCode, err)
+	}
 
 	var apiErr micetroAPIError
 	if json.Unmarshal(body, &apiErr) == nil && apiErr.Message != "" {
@@ -151,7 +158,7 @@ func checkResponse(resp *http.Response) error {
 }
 
 // FindZone finds a DNS zone by name in Micetro.
-func (client *Client) FindZone(zoneName string, dnsViewRef string) (*micetroZone, error) {
+func (client *Client) FindZone(zoneName string, dnsViewRef string) (_ *micetroZone, retErr error) {
 	filterName := strings.TrimSuffix(zoneName, ".")
 
 	path := "/dnsZones?filter=" + filterName
@@ -163,7 +170,11 @@ func (client *Client) FindZone(zoneName string, dnsViewRef string) (*micetroZone
 	if err != nil {
 		return nil, fmt.Errorf("failed listing zones: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing response body: %v", closeErr)
+		}
+	}()
 
 	if err := checkResponse(resp); err != nil {
 		return nil, err
@@ -185,7 +196,7 @@ func (client *Client) FindZone(zoneName string, dnsViewRef string) (*micetroZone
 }
 
 // FindViewRef resolves a DNS view name to its object reference.
-func (client *Client) FindViewRef(viewName string) (string, error) {
+func (client *Client) FindViewRef(viewName string) (_ string, retErr error) {
 	if viewName == "" {
 		return "", nil
 	}
@@ -196,7 +207,11 @@ func (client *Client) FindViewRef(viewName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed listing views: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing response body: %v", closeErr)
+		}
+	}()
 
 	if err := checkResponse(resp); err != nil {
 		return "", err
@@ -217,7 +232,7 @@ func (client *Client) FindViewRef(viewName string) (string, error) {
 }
 
 // CreateTXTRecord creates a TXT DNS record in the specified zone.
-func (client *Client) CreateTXTRecord(zoneRef, recordName, recordData string, ttl int) error {
+func (client *Client) CreateTXTRecord(zoneRef, recordName, recordData string, ttl int) (retErr error) {
 	path := "/dnsZones/" + zoneRef + "/dnsRecords"
 
 	reqBody := micetroCreateRecordRequest{
@@ -236,14 +251,18 @@ func (client *Client) CreateTXTRecord(zoneRef, recordName, recordData string, tt
 	if err != nil {
 		return fmt.Errorf("failed creating TXT record: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing response body: %v", closeErr)
+		}
+	}()
 
 	return checkResponse(resp)
 }
 
 // FindTXTRecord finds a specific TXT record by name and content in a zone.
 // Returns the record ref if found, empty string if not found.
-func (client *Client) FindTXTRecord(zoneRef, zoneName, recordFQDN, recordContent string) (string, error) {
+func (client *Client) FindTXTRecord(zoneRef, zoneName, recordFQDN, recordContent string) (_ string, retErr error) {
 	relName := strings.TrimSuffix(recordFQDN, zoneName)
 	relName = strings.TrimSuffix(relName, ".")
 
@@ -253,7 +272,11 @@ func (client *Client) FindTXTRecord(zoneRef, zoneName, recordFQDN, recordContent
 	if err != nil {
 		return "", fmt.Errorf("failed listing zone records: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing response body: %v", closeErr)
+		}
+	}()
 
 	if err := checkResponse(resp); err != nil {
 		return "", err
@@ -277,14 +300,18 @@ func (client *Client) FindTXTRecord(zoneRef, zoneName, recordFQDN, recordContent
 }
 
 // DeleteRecord deletes a DNS record by its object reference.
-func (client *Client) DeleteRecord(recordRef string) error {
+func (client *Client) DeleteRecord(recordRef string) (retErr error) {
 	path := "/dnsRecords/" + recordRef
 
 	resp, err := client.doRequest("DELETE", path, nil)
 	if err != nil {
 		return fmt.Errorf("failed deleting record: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && retErr == nil {
+			retErr = fmt.Errorf("error closing response body: %v", closeErr)
+		}
+	}()
 
 	return checkResponse(resp)
 }
