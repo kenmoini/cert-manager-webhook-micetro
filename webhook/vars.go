@@ -1,6 +1,6 @@
 package webhook
 
 const (
-	DefaultMicetroAPIBasePath = "/mmws/api"
+	DefaultMicetroAPIBasePath = "/mmws/api/v2"
 	DefaultMicetroAPIAuthPath = "/micetro/sessions"
 )

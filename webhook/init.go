@@ -7,7 +7,6 @@ import (
 )
 
 func (c *MicetroDNSProviderSolver) init(config *apiextensionsv1.JSON, namespace string) (*Client, *MicetroDNSProviderConfig, error) {
-	// Load and validate the configuration
 	cfg, err := loadConfig(config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed parsing provider config: %v", err)
@@ -17,5 +16,10 @@ func (c *MicetroDNSProviderSolver) init(config *apiextensionsv1.JSON, namespace 
 		return nil, nil, fmt.Errorf("failed validating config: %v", err)
 	}
 
-	return c.NewClient(cfg), cfg, nil
+	client, err := c.NewClient(cfg)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed creating API client: %v", err)
+	}
+
+	return client, cfg, nil
 }

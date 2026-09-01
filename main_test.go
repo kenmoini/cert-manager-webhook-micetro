@@ -21,7 +21,7 @@ func TestRunsSuite(t *testing.T) {
 	//	acmetest.SetManifestPath("testdata/micetro-solver"),
 	//	acmetest.SetBinariesPath("_test/kubebuilder/bin"),
 	//)
-	solver := example.New("59351")
+	solver := micetrowebhook.New("59351")
 	fixture := acmetest.NewFixture(solver,
 		acmetest.SetResolvedZone("example.com."),
 		acmetest.SetManifestPath("testdata/micetro-solver"),
