@@ -1,4 +1,4 @@
-name: Build Container - Cert-Manager Webhook for Micetro
+name: Release - Cert-Manager Webhook for Micetro
 
 env:
   BUILD_CONTEXT_PATH: .
@@ -9,21 +9,15 @@ env:
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - v**
     paths-ignore:
       - README.md
       - .github/dependabot.yml
       - .github/workflows/**
-      - deploy/argocd/**
-      - deploy/cert-manager-webhook-micetro/**
       - Makefile
       - OWNERS
       - renovate.json
-
-  # Schedule workflow run at 00:00 on Sunday
-  schedule:
-    - cron: '0 2 * * 0'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -87,13 +81,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # Here we disable other architectures since this pipeline is for main branch integration testing only.
-        # Multi-arch builds are handled in the release pipeline.
         platform:
           - linux/amd64
-          # - linux/arm64
-          # - linux/s390x
-          # - linux/ppc64le
+          - linux/arm64
+          - linux/s390x
+          - linux/ppc64le
     steps:
       - name: Prepare
         run: |
@@ -190,8 +182,10 @@ jobs:
           tags: |
             type=schedule
             type=ref,event=branch
+            type=ref,event=tag
             type=sha,prefix=,suffix=,format=short
             type=sha,prefix=,suffix=,format=long
+            type=raw,value=latest
 
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
