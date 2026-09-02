@@ -15,6 +15,7 @@ on:
       - README.md
       - .github/dependabot.yml
       - .github/workflows/**
+      - deploy/argocd/**
       - deploy/cert-manager-webhook-micetro/**
       - Makefile
       - OWNERS
