@@ -1,6 +1,9 @@
 # Always run basic Golang linting
 name: Lint
 
+permissions:
+  contents: read
+
 on:
   push:
     paths-ignore:
