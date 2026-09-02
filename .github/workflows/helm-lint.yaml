@@ -2,6 +2,7 @@ name: Helm - Lint and Test Charts
 
 permissions:
   contents: read
+  checks: write
 
 on:
   push:
