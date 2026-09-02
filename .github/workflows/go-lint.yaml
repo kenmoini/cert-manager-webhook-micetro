@@ -1,5 +1,5 @@
 # Always run basic Golang linting
-name: Lint
+name: Go - Lint
 
 permissions:
   contents: read

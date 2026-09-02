@@ -1,4 +1,4 @@
-name: Helm Security Scan
+name: Helm - Security Scan
 
 on:
   push:
