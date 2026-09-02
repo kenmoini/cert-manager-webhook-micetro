@@ -40,7 +40,7 @@ jobs:
           for chart in deploy/*/; do
             if [ -f "$chart/Chart.yaml" ]; then
               echo "Scanning $chart"
-              helm template test "$chart" | kubesec scan -
+              helm template test -n cert-manager "$chart" | kubesec scan -
             fi
           done
 
@@ -65,7 +65,7 @@ jobs:
           for chart in deploy/*/; do
             if [ -f "$chart/Chart.yaml" ]; then
               name=$(basename "$chart")
-              helm template test "$chart" > rendered/${name}.yaml
+              helm template test -n cert-manager "$chart" > rendered/${name}.yaml
             fi
           done
 
