@@ -50,12 +50,19 @@ priorityClassName: ""
 enableNetworkPolicy: false
 
 # Security context for the cert-manager-webhook-micetro pod
-securityContext:
+podSecurityContext:
+  runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
 
-# Additional volumes to add to the cert-manager-webhook-pdns pod.
+containerSecurityContext:
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+
+# Additional volumes to add to the cert-manager-webhook-micetro pod.
 volumes: []
 
-# Additional volume mounts to add to the cert-manager-webhook-pdns pod.
+# Additional volume mounts to add to the cert-manager-webhook-micetro pod.
 volumeMounts: []
