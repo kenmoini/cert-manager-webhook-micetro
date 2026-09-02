@@ -19,15 +19,6 @@ on:
       - Makefile
       - OWNERS
       - renovate.json
-  pull_request:
-    paths-ignore:
-      - README.md
-      - .github/dependabot.yml
-      - .github/workflows/**
-      - deploy/cert-manager-webhook-micetro/**
-      - Makefile
-      - OWNERS
-      - renovate.json
 
   # Schedule workflow run at 00:00 on Sunday
   schedule:
@@ -78,7 +69,7 @@ jobs:
       - name: Running Tests
         run: |
           go mod tidy
-        # make test
+          make test
 
   # Build the container
   build:
