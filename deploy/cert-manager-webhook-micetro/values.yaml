@@ -17,7 +17,11 @@ certManager:
 image:
   repository: ghcr.io/kenmoini/cert-manager-webhook-micetro
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+# -- Optional array of imagePullSecrets containing private registry credentials
+imagePullSecrets: []
+# - name: secretName
 
 nameOverride: ""
 fullnameOverride: ""
@@ -29,10 +33,10 @@ service:
 
 resources:
   limits:
-    memory: 256Mi
-  requests:
-    cpu: 100m
     memory: 128Mi
+  requests:
+    cpu: 150m
+    memory: 64Mi
 
 nodeSelector: {}
 
@@ -40,8 +44,18 @@ tolerations: []
 
 affinity: {}
 
+priorityClassName: ""
+
+# Enable or disable the creation of a NetworkPolicy for the cert-manager-webhook-micetro pod.
 enableNetworkPolicy: false
 
+# Security context for the cert-manager-webhook-micetro pod
 securityContext:
   seccompProfile:
     type: RuntimeDefault
+
+# Additional volumes to add to the cert-manager-webhook-pdns pod.
+volumes: []
+
+# Additional volume mounts to add to the cert-manager-webhook-pdns pod.
+volumeMounts: []
