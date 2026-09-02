@@ -60,6 +60,9 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   seccompProfile:
     type: RuntimeDefault
+  capabilities:
+    drop:
+      - ALL
 
 # Additional volumes to add to the cert-manager-webhook-micetro pod.
 volumes: []
