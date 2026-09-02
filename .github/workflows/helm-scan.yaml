@@ -1,0 +1,101 @@
+name: Helm Security Scan
+
+on:
+  push:
+    paths:
+      - 'deploy/cert-manager-webhook-micetro/**'
+  pull_request:
+    paths:
+      - 'deploy/cert-manager-webhook-micetro/**'
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly
+
+jobs:
+  kubesec:
+    name: Kubesec Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v4.2.4
+
+      - name: Install kubesec
+        run: |
+          curl -LO https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64.tar.gz
+          tar xzf kubesec_linux_amd64.tar.gz
+          sudo mv kubesec /usr/local/bin/
+
+      - name: Scan charts
+        run: |
+          for chart in deploy/*/; do
+            echo "Scanning $chart"
+            helm template test "$chart" | kubesec scan -
+          done
+
+  trivy:
+    name: Trivy Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v4.2.4
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.34.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'deploy/'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      # - name: Upload Trivy scan results
+      #   uses: github/codeql-action/upload-sarif@v4
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
+
+  checkov:
+    name: Checkov Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v4.2.4
+
+      - name: Template charts
+        run: |
+          mkdir -p rendered
+          for chart in deploy/*/; do
+            name=$(basename "$chart")
+            helm template test "$chart" > rendered/${name}.yaml
+          done
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: rendered/
+          framework: kubernetes
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      # - name: Upload Checkov results
+      #   uses: github/codeql-action/upload-sarif@v4
+      #   if: always()
+      #   with:
+      #     sarif_file: checkov-results.sarif
