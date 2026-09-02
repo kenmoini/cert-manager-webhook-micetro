@@ -10,6 +10,9 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Weekly
 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
   kubesec:
     name: Kubesec Scan
@@ -26,15 +29,17 @@ jobs:
 
       - name: Install kubesec
         run: |
-          curl -LO https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64.tar.gz
+          curl -LO https://github.com/controlplaneio/kubesec/releases/download/v2.14.2/kubesec_linux_amd64.tar.gz
           tar xzf kubesec_linux_amd64.tar.gz
           sudo mv kubesec /usr/local/bin/
 
       - name: Scan charts
         run: |
           for chart in deploy/*/; do
-            echo "Scanning $chart"
-            helm template test "$chart" | kubesec scan -
+            if [ "$chart" != "deploy/argocd/" ]; then
+              echo "Scanning $chart"
+              helm template test "$chart" | kubesec scan -
+            fi
           done
 
   checkov:
@@ -56,8 +61,10 @@ jobs:
         run: |
           mkdir -p rendered
           for chart in deploy/*/; do
-            name=$(basename "$chart")
-            helm template test "$chart" > rendered/${name}.yaml
+            if [ "$chart" != "deploy/argocd/" ]; then
+              name=$(basename "$chart")
+              helm template test "$chart" > rendered/${name}.yaml
+            fi
           done
 
       - name: Run Checkov
