@@ -36,7 +36,7 @@ jobs:
       - name: Scan charts
         run: |
           for chart in deploy/*/; do
-            if [ "$chart" != "deploy/argocd/" ]; then
+            if [ -f "$chart/Chart.yaml" ]; then
               echo "Scanning $chart"
               helm template test "$chart" | kubesec scan -
             fi
@@ -61,7 +61,7 @@ jobs:
         run: |
           mkdir -p rendered
           for chart in deploy/*/; do
-            if [ "$chart" != "deploy/argocd/" ]; then
+            if [ -f "$chart/Chart.yaml" ]; then
               name=$(basename "$chart")
               helm template test "$chart" > rendered/${name}.yaml
             fi
