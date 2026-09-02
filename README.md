@@ -28,6 +28,7 @@ The webhook reads its configuration from the Issuer or ClusterIssuer resource. Y
 ### ClusterIssuer Example
 
 ```yaml
+---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -57,6 +58,7 @@ spec:
 ### Issuer Example
 
 ```yaml
+---
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -83,6 +85,27 @@ spec:
               ttl: 60
               timeout: 30
 ```
+
+### Certificate Example
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: test-example-ca
+  namespace: my-app
+spec:
+  secretName: example-com-tls
+  dnsNames:
+    - example.com
+    - www.example.com
+  issuerRef:
+    name: letsencrypt-micetro
+    kind: Issuer
+    group: cert-manager.io
+```
+
 
 ### Configuration Fields
 
