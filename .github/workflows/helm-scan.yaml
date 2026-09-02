@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - 'deploy/cert-manager-webhook-micetro/**'
+      - '.github/workflows/helm-scan.yaml'
   pull_request:
     paths:
       - 'deploy/cert-manager-webhook-micetro/**'
+      - '.github/workflows/helm-scan.yaml'
   schedule:
     - cron: '0 0 * * 0'  # Weekly
 
