@@ -129,10 +129,10 @@ jobs:
           version: v4.2.4
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2
+        uses: helm/chart-testing-action@v2.8.0
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1
+        uses: helm/kind-action@v1.14.0
 
       - name: List changed charts
         id: list-changed
