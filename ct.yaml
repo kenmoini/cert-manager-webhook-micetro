@@ -1,0 +1,9 @@
+# Chart Testing configuration file
+remote: origin
+target-branch: main
+chart-dirs:
+  - deploy/cert-manager-webhook-micetro
+helm-extra-args: --timeout 600s
+validate-maintainers: true
+check-version-increment: true
+validate-chart-schema: true

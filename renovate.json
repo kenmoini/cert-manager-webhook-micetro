@@ -2,5 +2,20 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>cert-manager/renovate-config"
+  ],
+  "helm-values": {
+    "fileMatch": ["deploy/.+/values\\.yaml$"]
+  },
+  "helmv3": {
+    "fileMatch": ["deploy/.+/Chart\\.yaml$"]
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["deploy/.+/Chart\\.yaml$"],
+      "matchStrings": [
+        "repository: (?<depName>[^\\s]+)\\n\\s+tag: (?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker"
+    }
   ]
 }
