@@ -1,0 +1,26 @@
+{{- if .Values.enableNetworkPolicy }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-to-micetro-webhook
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+  labels:
+    app: {{ include "cert-manager-webhook-micetro.name" . }}
+    chart: {{ include "cert-manager-webhook-micetro.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "cert-manager-webhook-micetro.name" . }}
+      release: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 10250
+
+{{- end }}
