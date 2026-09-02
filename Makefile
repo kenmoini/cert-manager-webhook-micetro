@@ -51,7 +51,11 @@ clean:
 
 .PHONY: build
 build:
-	$(CONTAINER_TOOL) build -t "$(IMAGE_NAME):$(IMAGE_TAG)" .
+	CGO_ENABLED=0 go build -o cert-manager-webhook-micetro -buildvcs=false -ldflags '-w -extldflags "-static"' .
+
+.PHONY: build-container
+build-container:
+	$(CONTAINER_TOOL) build -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
 .PHONY: rendered-manifest.yaml
 rendered-manifest.yaml: $(OUT)/rendered-manifest.yaml
