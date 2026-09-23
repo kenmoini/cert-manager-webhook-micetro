@@ -27,7 +27,7 @@ RUN CGO_ENABLED=1 go build -o cert-manager-webhook-micetro -buildvcs=false -ldfl
 # ===========================================================================
 # Final Stage
 # ===========================================================================
-FROM registry.access.redhat.com/ubi10/ubi-minimal:1788137827
+FROM registry.access.redhat.com/ubi10/ubi-minimal:1790075800
 
 USER 0
 RUN microdnf install -y ca-certificates openssl && \
