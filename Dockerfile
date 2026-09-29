@@ -1,7 +1,7 @@
 # ===========================================================================
 # Build Stage
 # ===========================================================================
-FROM registry.access.redhat.com/ubi10/go-toolset:1788213739 AS build_deps
+FROM registry.access.redhat.com/ubi10/go-toolset:1790644755 AS build_deps
 
 WORKDIR /workspace
 USER 0
